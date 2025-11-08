@@ -10,7 +10,7 @@ async function handleGenerateNewShortUrl(req,res){
   try {
     await URL.create({
       shortId: shortId,
-      redirectId: body.URL,
+      redirectURL: body.url,
       visitHistory: [],
     });
     return res.json({id:shortId});
@@ -19,8 +19,6 @@ async function handleGenerateNewShortUrl(req,res){
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-
-
 
 async function handleRedirectUrl(req, res) {
   const shortId = req.params.shortId;
@@ -42,7 +40,16 @@ async function handleRedirectUrl(req, res) {
   }
 }
 
+async function handleGetAnalytics(req,res) {
+  const shortId = req.params.shortId;
+  const result = await URL.findOne({shortId});
+  return res.json({totalClicks:result.visitHistory.length , analytics:result.visitHistory});
+}
+
+
+
 module.exports = {
   handleGenerateNewShortUrl,
   handleRedirectUrl,
+  handleGetAnalytics,
 };

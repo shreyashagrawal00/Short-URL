@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
    required:true,
    unique:true,
  },
- redirectId:{
+ redirectURL:{
    type:String,
    required:true,
  },
