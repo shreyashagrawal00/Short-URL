@@ -1,5 +1,6 @@
 const shortid = require('shortid');
-const URL = require("../models/url")
+const URL = require("../models/url");
+const { render } = require('ejs');
 
 async function handleGenerateNewShortUrl(req,res){
   const body = req.body;
@@ -13,7 +14,9 @@ async function handleGenerateNewShortUrl(req,res){
       redirectURL: body.url,
       visitHistory: [],
     });
-    return res.json({id:shortId});
+    return res.render("home",{
+      id:shortId,
+    });
   } catch (err) {
     console.error('Failed to create URL document:', err);
     return res.status(500).json({ error: 'Internal Server Error' });
