@@ -23,10 +23,6 @@ app.use("/url",restricedToLoginUserOnly,urlRouter);
 app.use("/",checkAuth,staticRouter);  
 app.use("/user",UserRouter);
 
-app.get("/",(req,res)=>{
-  res.render("index");
-})
-
 app.get("/:shortId",async(req,res)=>{
   const shortId = req.params.shortId;
 
@@ -36,8 +32,13 @@ app.get("/:shortId",async(req,res)=>{
     visitHistory:{
       timestamp:Date.now(),
     },
-  }})
-  res.redirect(entry.redirectURL)
-})
+  }});
+
+  if (!entry) {
+    return res.status(404).json("URL not found");
+  };
+
+  res.redirect(entry.redirectURL);
+});
 
 app.listen(PORT,()=>{console.log(`Server Started At PORT:${PORT}`)});
