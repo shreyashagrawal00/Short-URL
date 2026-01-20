@@ -2,9 +2,9 @@ const shortid = require('shortid');
 const URL = require("../models/url");
 const { render } = require('ejs');
 
-async function handleGenerateNewShortUrl(req,res){
+async function handleGenerateNewShortUrl(req, res) {
   const body = req.body;
-  if(!body || !body.url) return res.status(400).json({error:"URL is required"});
+  if (!body || !body.url) return res.status(400).json({ error: "URL is required" });
 
   const shortId = shortid();
 
@@ -15,8 +15,8 @@ async function handleGenerateNewShortUrl(req,res){
       visitHistory: [],
       createdBy: req.user._id,
     });
-    return res.render("home",{
-      id:shortId,
+    return res.render("home", {
+      id: shortId,
     });
   } catch (err) {
     console.error('Failed to create URL document:', err);
@@ -26,17 +26,17 @@ async function handleGenerateNewShortUrl(req,res){
 
 async function handleRedirectUrl(req, res) {
   const shortId = req.params.shortId;
-  
+
   try {
     const entry = await URL.findOneAndUpdate(
-      { shortId : shortId },
+      { shortId: shortId },
       { $push: { visitHistory: { timestamp: Date.now() } } }
     );
-    
+
     if (!entry) {
       return res.status(404).json({ error: "Short URL not found" });
     }
-    
+
     return res.redirect(entry.redirectURL);
   } catch (err) {
     console.error('Failed to redirect URL:', err);
@@ -44,14 +44,26 @@ async function handleRedirectUrl(req, res) {
   }
 }
 
-async function handleGetAnalytics(req,res) {
+async function handleGetAnalytics(req, res) {
   const shortId = req.params.shortId;
-  const result = await URL.findOne({shortId});
-  return res.json({totalClicks:result.visitHistory.length , analytics:result.visitHistory});
+  const result = await URL.findOne({ shortId });
+  return res.json({ totalClicks: result.visitHistory.length, analytics: result.visitHistory });
+}
+
+async function handleDeleteUrl(req, res) {
+  const id = req.params.id;
+  try {
+    await URL.findByIdAndDelete(id);
+    return res.redirect("/");
+  } catch (err) {
+    console.error('Failed to delete URL:', err);
+    return res.status(500).send("Internal Server Error");
+  }
 }
 
 module.exports = {
   handleGenerateNewShortUrl,
   handleRedirectUrl,
   handleGetAnalytics,
+  handleDeleteUrl,
 };

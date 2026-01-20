@@ -12,6 +12,7 @@ const PORT = 8002;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(express.static("public"));
 connectToMongoDB("mongodb://localhost:27017/short-url")
 .then(()=>console.log("mongodb connected"));
 
