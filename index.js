@@ -10,6 +10,9 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = process.env.PORT || 8002;
 
+// Enable trust proxy for Render
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -47,6 +50,8 @@ app.get("/:shortId", async (req, res) => {
   res.redirect(entry.redirectURL);
 });
 
-app.listen(PORT, () => { console.log(`Server Started At PORT:${PORT}`) });
+if (require.main === module) {
+  app.listen(PORT, () => { console.log(`Server Started At PORT:${PORT}`) });
+}
 
 module.exports = app;
