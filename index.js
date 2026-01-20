@@ -20,7 +20,7 @@ connectToMongoDB(process.env.MONGO_URL || "mongodb://localhost:27017/short-url")
   .catch((err) => console.error("MongoDB connection error:", err));
 
 app.set("view engine", "ejs");
-app.set("views", Path.resolve("./views"));
+app.set("views", Path.join(__dirname, "views"));
 
 
 app.use("/url", restricedToLoginUserOnly, urlRouter);
