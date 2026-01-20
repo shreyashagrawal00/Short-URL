@@ -1,39 +1,44 @@
 const express = require('express');
-const {connectToMongoDB} = require("./connect");
+const { connectToMongoDB } = require("./connect");
 const urlRouter = require("./routes/url");
-const URL = require("./models/url");  
+const URL = require("./models/url");
 const Path = require("path");
-const staticRouter = require("./routes/staticRouter");  
+const staticRouter = require("./routes/staticRouter");
 const UserRouter = require("./routes/user");
-const {restricedToLoginUserOnly,checkAuth} = require("./middlewares/auth")
+const { restricedToLoginUserOnly, checkAuth } = require("./middlewares/auth")
 const cookieParser = require("cookie-parser");
 const app = express();
-const PORT = 8002;
+const PORT = process.env.PORT || 8002;
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("public"));
-connectToMongoDB("mongodb://localhost:27017/short-url")
-.then(()=>console.log("mongodb connected"));
 
-app.set("view engine","ejs");
-app.set("views" , Path.resolve("./views"));
+connectToMongoDB(process.env.MONGO_URL || "mongodb://localhost:27017/short-url")
+  .then(() => console.log("mongodb connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+app.set("view engine", "ejs");
+app.set("views", Path.resolve("./views"));
 
 
-app.use("/url",restricedToLoginUserOnly,urlRouter);
-app.use("/",checkAuth,staticRouter);  
-app.use("/user",UserRouter);
+app.use("/url", restricedToLoginUserOnly, urlRouter);
+app.use("/", checkAuth, staticRouter);
+app.use("/user", UserRouter);
 
-app.get("/:shortId",async(req,res)=>{
+app.get("/:shortId", async (req, res) => {
   const shortId = req.params.shortId;
 
   const entry = await URL.findOneAndUpdate({
     shortId,
-  },{ $push: {
-    visitHistory:{
-      timestamp:Date.now(),
-    },
-  }});
+  }, {
+    $push: {
+      visitHistory: {
+        timestamp: Date.now(),
+      },
+    }
+  });
 
   if (!entry) {
     return res.status(404).json("URL not found");
@@ -42,4 +47,6 @@ app.get("/:shortId",async(req,res)=>{
   res.redirect(entry.redirectURL);
 });
 
-app.listen(PORT,()=>{console.log(`Server Started At PORT:${PORT}`)});
+app.listen(PORT, () => { console.log(`Server Started At PORT:${PORT}`) });
+
+module.exports = app;
