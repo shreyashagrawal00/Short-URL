@@ -10,6 +10,12 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = process.env.PORT || 8002;
 
+// Validate required environment variables
+if (!process.env.MONGO_URL) {
+  console.error('FATAL: MONGO_URL environment variable is not set');
+  console.error('Please set MONGO_URL in your environment or Vercel project settings');
+}
+
 // Enable trust proxy for Render
 app.set("trust proxy", 1);
 
